@@ -40,6 +40,18 @@ io.sockets.on('connection', function (client) {
     client.on('disconnect', leave);
     client.on('leave', leave);
 
+    client.on('broadcast', function (payload) {
+		if (payload === null) return;
+        var rooms = io.sockets.manager.roomClients[client.id];
+		console.log('got a broadcast', payload);
+		payload.sender = client.id;
+        for (var name in rooms) {
+            if (name) {
+                io.sockets.in(name.slice(1)).emit('broadcast', payload);
+            }
+        }
+    });
+
     client.on('create', function (name, cb) {
         if (arguments.length == 2) {
             cb = (typeof cb == 'function') ? cb : function () {};
